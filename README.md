@@ -25,10 +25,11 @@ The main concept of differential drive is to rotate around the ICC (_Instantaneo
 $$
 \omega (R + L/2) = Vr \\
 $$
+
 $$
 \omega (R - L/2) = Vl \\
-\\
 $$
+
 $$
 R = \frac{L}{2} \frac{Vl + Vr}{Vr + Vl} \quad \\
 \text{and} \\
