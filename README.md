@@ -36,6 +36,10 @@ R = \frac{L}{2} \frac{Vl + Vr}{Vr + Vl} \quad \\
 \quad \omega = \frac{Vr - Vl}{L}
 $$
 
+*If Vl=Vr, robot move forward linear motion in a straght line. (R=∞)
+*If Vl=-Vr, robot rotate its around. (R=0)
+*If Vl>Vr, robot rotates right otherwise rotates left. 
+
 
 ## Dependencies
 ## Installation
