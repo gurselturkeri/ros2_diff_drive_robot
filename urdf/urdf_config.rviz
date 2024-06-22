@@ -1,0 +1,99 @@
+Panels:
+  - Class: rviz/Displays
+    Name: Displays
+    Properties:
+      Displays:
+        - Class: rviz/Grid
+          Name: Grid
+          Enabled: true
+          Cell Size: 1
+          Color: 160; 160; 160
+          Reference Frame: <Fixed Frame>
+          Plane: XY
+          Normal Cell Count: 0
+          Alpha: 0.5
+        - Class: rviz/RobotModel
+          Name: RobotModel
+          Enabled: true
+          Robot Description: robot_description
+          Alpha: 1
+          Collision Enabled: false
+          Update Interval: 0
+          Visual Enabled: true
+        - Class: rviz/TF
+          Name: TF
+          Enabled: true
+          Show Axes: true
+          Show Names: false
+          Show Arrows: true
+          Marker Scale: 1
+        - Class: rviz/Imu
+          Name: IMU
+          Enabled: true
+          Topic: /imu
+          Color: 255; 25; 0
+          Acceleration Arrow Scale: 10
+          Acceleration Arrow Color: 85; 170; 255
+          Orientation Arrow Scale: 10
+          Orientation Arrow Color: 85; 170; 255
+          Position Arrow Scale: 10
+          Position Arrow Color: 85; 170; 255
+          Orientation Covariance Arrow Scale: 1
+          Position Covariance Arrow Scale: 1
+Window Geometry:
+  Displays:
+    collapsed: false
+    height: 450
+    width: 320
+    x: 20
+    y: 20
+    fullscreen: false
+  Tools:
+    collapsed: false
+    height: 450
+    width: 320
+    x: 20
+    y: 480
+    fullscreen: false
+  Views:
+    collapsed: false
+    height: 450
+    width: 320
+    x: 340
+    y: 20
+    fullscreen: false
+Tool Manager:
+  Tools:
+    - Class: rviz/Interact
+      Name: Interact
+    - Class: rviz/MoveCamera
+      Name: Move Camera
+    - Class: rviz/Select
+      Name: Select
+    - Class: rviz/FocusCamera
+      Name: Focus Camera
+    - Class: rviz/Measure
+      Name: Measure
+    - Class: rviz/SetInitialPose
+      Name: 2D Pose Estimate
+      Topic: /initialpose
+    - Class: rviz/SetGoal
+      Name: 2D Nav Goal
+      Topic: /move_base_simple/goal
+Views:
+  Current:
+    Class: rviz/Orbit
+    Distance: 6
+    Focal Point: 0; 0; 1
+    Pitch: 0.785
+    Yaw: 1.571
+    Frame: <Fixed Frame>
+    Name: Current
+  Saved:
+    - Class: rviz/Orbit
+      Distance: 6
+      Focal Point: 0; 0; 1
+      Pitch: 0.785
+      Yaw: 1.571
+      Frame: <Fixed Frame>
+      Name: Default
