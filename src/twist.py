@@ -29,7 +29,7 @@ class RobotController(Node):
             # Turn right
             self.command.linear.x = 0.0
             self.command.angular.z = 1.0
-            if elapsed_time > 8:  # Turn right for 2 seconds
+            if elapsed_time > 5:  # Turn right for 2 seconds
                 self.step = 2
                 self.start_time = time.time()
 

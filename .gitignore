@@ -3,6 +3,7 @@ build/
 install/
 log/
 
+.vscode/
 # ROS2 workspace files
 .colcon/
 
