@@ -1,9 +1,0 @@
-# ROS2 build and install directories
-build/
-install/
-log/
-
-.vscode/*
-# ROS2 workspace files
-.colcon/
-
