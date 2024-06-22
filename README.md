@@ -14,6 +14,22 @@ The main concept of differential drive is to rotate around the ICC (_Instantaneo
   <img src="https://raw.githubusercontent.com/gurselturkeri/ros2_diff_drive_robot/main/docs/ezgif-6-3fa0e46a45.gif" width="400"/>
  </div>
 
+- **ICC**: Instantaneous Center of Curvature.
+- **ω**: Rotation about the ICC.
+- **L**: Distance between the centers of the two wheels.
+- **Vr**: Right wheel velocity along the ground.
+- **Vl**: Left wheel velocity along the ground.
+- **R**: Distance from ICC to the midpoint between the wheels.
+
+
+$$
+\omega (R + L/2) = Vr \\
+\omega (R - L/2) = Vl \\
+\\
+R = \frac{L}{2} \frac{Vl + Vr}{Vr + Vl} \\
+\text{and} \\
+\omega = \frac{Vr - Vl}{L}
+$$
 
 
 ## Dependencies
