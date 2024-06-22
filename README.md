@@ -7,7 +7,7 @@ A ROS 2 package for simulating and controlling a differential drive robot. This 
 - [References](#references)
 
 ## Differential Drive Kinematics
-
+The main concept of differential drive is to rotate around the ICC (_Instantaneous Center of Curvature_) point with the left and right wheel speed.
 <div id="header" align="center">
   <img src="https://raw.githubusercontent.com/gurselturkeri/ros2_diff_drive_robot/main/docs/diff_drive_github.png" width="400"/>
   
