@@ -11,7 +11,7 @@ The main concept of differential drive is to rotate around the ICC (_Instantaneo
 <div id="header" align="center">
   <img src="https://raw.githubusercontent.com/gurselturkeri/ros2_diff_drive_robot/main/docs/diff_drive_github.png" width="400"/>
   
-  <img src="https://s7.ezgif.com/tmp/ezgif-7-9f02e52a27.gif" width="400"/>
+  <img src="https://raw.githubusercontent.com/gurselturkeri/ros2_diff_drive_robot/main/docs/rviz_robot.gif" width="400"/>
  </div>
 
 - **ICC**: Instantaneous Center of Curvature.
