@@ -102,6 +102,12 @@
 </link>
 
 <link name="imu_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0.15815"/>
+      <geometry>
+        <box size="0.01 0.01 0.01"/>
+      </geometry>
+    </visual>
   </link>
 
 
@@ -116,7 +122,7 @@
     </visual>
     <collision>
         <geometry>
-            <cylinder radius="0.1" length="0.05"/>
+            <cylinder radius="0.05" length="0.05"/>
         </geometry>
         <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
     </collision>
@@ -137,7 +143,7 @@
 <joint name="base_joint" type="fixed">
     <parent link="base_footprint"/>
     <child link="base_link"/>
-    <origin xyz="0.0 0.0 0.1" rpy="0.0 0.0 0.0"/>
+    <origin xyz="0.0 0.0 0.05" rpy="0.0 0.0 0.0"/>
 </joint>
 
 <joint name="base_lidar_joint" type="fixed">
@@ -191,49 +197,50 @@
         <publish_odom_tf>true</publish_odom_tf>
         <publish_wheel_tf>true</publish_wheel_tf>
     </plugin>
+</gazebo>
 
-    <plugin name="imu_plugin" filename="libgazebo_ros_imu.so">
-        <alwaysOn>true</alwaysOn>
-        <bodyName>imu_link</bodyName>
-        <frameName>imu_link</frameName>
+<gazebo reference="imu_link">
+    <sensor type="imu" name="imu">
+      <always_on>true</always_on>
+      <plugin filename="libgazebo_ros_imu_sensor.so" name="imu_plugin">
         <topicName>imu</topicName>
-        <serviceName>imu_service</serviceName>
+        <bodyName>imu_link</bodyName>
+        <updateRateHZ>10.0</updateRateHZ>
         <gaussianNoise>0.0</gaussianNoise>
-        <updateRate>0</updateRate>
-        <imu>
-          <noise>
-            <type>gaussian</type>
-            <rate>
-              <mean>0.0</mean>
-              <stddev>2e-4</stddev>
-              <bias_mean>0.0000075</bias_mean>
-              <bias_stddev>0.0000008</bias_stddev>
-            </rate>
-            <accel>
-              <mean>0.0</mean>
-              <stddev>1.7e-2</stddev>
-              <bias_mean>0.1</bias_mean>
-              <bias_stddev>0.001</bias_stddev>
-            </accel>
-          </noise>
-        </imu>
+        <xyzOffset>0 0 0</xyzOffset>
+        <rpyOffset>0 0 0</rpyOffset>
+        <frameName>imu_link</frameName>
+        <initialOrientationAsReference>false</initialOrientationAsReference>
       </plugin>
+    </sensor>
+  </gazebo>
 
-
-      <plugin name="gazebo_ros_laser" filename="libgazebo_ros_laser.so">
-        <robotNamespace>/my_robot</robotNamespace>
-        <frameName>lidar_link</frameName>
-        <topicName>/scan</topicName>
-        <gaussianNoise>0.01</gaussianNoise>
-        <updateRate>40</updateRate>
-        <hokuyo>
-          <minAngle>-1.5708</minAngle> <!-- -90 degrees -->
-          <maxAngle>1.5708</maxAngle>  <!-- 90 degrees -->
-          <minRange>0.1</minRange>
-          <maxRange>30.0</maxRange>
-          <resolution>0.00436332</resolution> <!-- 0.25 degrees -->
-        </hokuyo>
-      </plugin>
+  <gazebo reference="lidar_link">
+    <sensor name="laser" type="ray">
+        <pose> 0 0 0 0 0 0 </pose>
+        <visualize>true</visualize>
+        <update_rate>10</update_rate>
+        <ray>
+            <scan>
+                <horizontal>
+                    <samples>720</samples>
+                    <min_angle>-3.14</min_angle>
+                    <max_angle>3.14</max_angle>
+                </horizontal>
+            </scan>
+            <range>
+                <min>0.1</min>
+                <max>12</max>
+            </range>
+        </ray>
+        <plugin name="laser_controller" filename="libgazebo_ros_ray_sensor.so">
+            <ros>
+                <argument>~/out:=scan</argument>
+            </ros>
+            <output_type>sensor_msgs/LaserScan</output_type>
+            <frame_name>lidar_link</frame_name>
+        </plugin>
+    </sensor>
 </gazebo>
 
 <gazebo reference="base_link">

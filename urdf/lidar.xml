@@ -1,0 +1,14 @@
+      <plugin name="gazebo_ros_laser" filename="libgazebo_ros_laser.so">
+        <robotNamespace>/my_robot</robotNamespace>
+        <frameName>lidar_link</frameName>
+        <topicName>/scan</topicName>
+        <gaussianNoise>0.01</gaussianNoise>
+        <updateRate>40</updateRate>
+        <hokuyo>
+          <minAngle>-1.5708</minAngle> <!-- -90 degrees -->
+          <maxAngle>1.5708</maxAngle>  <!-- 90 degrees -->
+          <minRange>0.1</minRange>
+          <maxRange>30.0</maxRange>
+          <resolution>0.00436332</resolution> <!-- 0.25 degrees -->
+        </hokuyo>
+      </plugin>
