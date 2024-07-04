@@ -41,20 +41,22 @@ $$
 - If **Vl>Vr**, robot rotates right otherwise rotates left. 
 
 
-## Mapping with using Nav2
+## Mapping with Nav2
+Used Nav2 package to generate `.pgm` format map.
 
+Add “use_sim_time:=True” to use the Gazebo time. If using the real robot, skip this argument.
 ```
 ros2 launch nav2_bringup navigation_launch.py use_sim_time:=True
 ```
-
+Same as previous code.
 ```
 ros2 launch slam_toolbox online_async_launch.py use_sim_time:=True
 ```
-
+So we need move our robot to discover map.
 ```
 python3 ~/ros2_ws/src/diff_robot/control/keyboard_control.py
 ```
-
+Once you get a good enough looking map, you can save it.
 ```
 ros2 run nav2_map_server map_saver_cli -f my_map
 ```
