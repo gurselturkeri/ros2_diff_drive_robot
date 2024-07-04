@@ -41,6 +41,33 @@ $$
 - If **Vl>Vr**, robot rotates right otherwise rotates left. 
 
 
+## Mapping with using Nav2
+
+```
+ros2 launch nav2_bringup navigation_launch.py use_sim_time:=True
+```
+
+```
+ros2 launch slam_toolbox online_async_launch.py use_sim_time:=True
+```
+
+```
+python3 ~/ros2_ws/src/diff_robot/control/keyboard_control.py
+```
+
+```
+ros2 run nav2_map_server map_saver_cli -f my_map
+```
+
+<div id="header" align="center">
+  <img src="https://raw.githubusercontent.com/gurselturkeri/ros2_diff_drive_robot/main/docs/diff_drive_github.png" width="400"/>
+  
+ </div>
+
+
+## A* Algorithm 
+## Path Planning
+
 ## Dependencies
 ## Installation
 
