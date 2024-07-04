@@ -60,7 +60,7 @@ ros2 run nav2_map_server map_saver_cli -f my_map
 ```
 
 <div id="header" align="center">
-  <img src="https://raw.githubusercontent.com/gurselturkeri/ros2_diff_drive_robot/main/docs/diff_drive_github.png" width="400"/>
+  <img src="https://raw.githubusercontent.com/gurselturkeri/ros2_diff_drive_robot/main/docs/mapping.gif" width="400"/>
   
  </div>
 
