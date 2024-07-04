@@ -1,0 +1,15 @@
+ros2 launch nav2_bringup navigation_launch.py use_sim_time:=True
+
+ros2 launch slam_toolbox online_async_launch.py use_sim_time:=True
+
+ros2 run nav2_map_server map_saver_cli -f my_map
+
+
+
+
+ros2 run tf2_ros static_transform_publisher 0 0 0 0 0 0 1 map odom
+
+ros2 run nav2_map_server map_server --ros-args -p yaml_filename:=/home/gursel/ros2_ws/src/diff_robot/map/my_map.yaml
+
+ros2 run nav2_util lifecycle_bringup map_server
+

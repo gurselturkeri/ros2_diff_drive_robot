@@ -10,6 +10,11 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(robot_state_publisher REQUIRED)
 find_package(gazebo_ros REQUIRED)
+find_package(controller_manager REQUIRED)
+find_package(diff_drive_controller REQUIRED)
+find_package(nav_msgs REQUIRED)
+find_package(nav2_msgs REQUIRED)
+
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
@@ -18,6 +23,13 @@ install(
   DIRECTORY launch
   DESTINATION share/${PROJECT_NAME}/
 )
+
+
+
+
+add_executable(pose_publisher src/odom_pose.cpp)
+ament_target_dependencies(pose_publisher rclcpp nav_msgs geometry_msgs)
+
 
 
 if(BUILD_TESTING)
@@ -31,5 +43,9 @@ if(BUILD_TESTING)
   set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
 endif()
+
+install(TARGETS
+  pose_publisher
+  DESTINATION lib/${PROJECT_NAME})
 
 ament_package()
