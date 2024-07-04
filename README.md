@@ -6,7 +6,7 @@ A ROS 2 package for simulating and controlling a differential drive robot. This 
 - [Installation](#installation)
 - [References](#references)
 
-## Differential Drive Kinematics
+### Differential Drive Kinematics
 The main concept of differential drive is to rotate around the ICC (_Instantaneous Center of Curvature_) point with the left and right wheel speed.
 <div id="header" align="center">
   <img src="https://raw.githubusercontent.com/gurselturkeri/ros2_diff_drive_robot/main/docs/diff_drive_github.png" width="400"/>
@@ -41,7 +41,7 @@ $$
 - If **Vl>Vr**, robot rotates right otherwise rotates left. 
 
 
-## Mapping with Nav2
+### Mapping with Nav2
 Used Nav2 package to generate `.pgm` format map.
 <div id="header" align="center">
   <img src="https://raw.githubusercontent.com/gurselturkeri/ros2_diff_drive_robot/main/docs/mapping.gif" width="500"/>
@@ -64,6 +64,17 @@ Once you get a good enough looking map, you can save it.
 ```
 ros2 run nav2_map_server map_saver_cli -f my_map
 ```
+
+### .pgm format to occupancy grid map
+
+```
+map_server map_server --ros-args -p yaml_filename:=~/ros2_ws/src/diff_robot/map/my_map.yaml
+```
+
+```
+ros2 run nav2_util lifecycle_bringup map_server
+```
+
 
 
 
