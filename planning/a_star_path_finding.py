@@ -1,7 +1,7 @@
 import rclpy
 from rclpy.node import Node
 from nav_msgs.msg import OccupancyGrid, Path
-from geometry_msgs.msg import PoseStamped
+from geometry_msgs.msg import PoseStamped, PoseWithCovarianceStamped
 from rclpy.qos import QoSProfile, DurabilityPolicy, ReliabilityPolicy
 import heapq
 
@@ -9,17 +9,41 @@ class PathPlanner(Node):
     def __init__(self):
         super().__init__('path_planner')
         self.get_logger().info('Initializing Path Planner Node')
+        self.goal_x = 0
+        self.goal_y = 0
+        self.robot_pose_x = 0
+        self.robot_pose_y = 0 
+        self.map_received = False
 
         # Define QoS profile
         qos_profile = rclpy.qos.QoSProfile(depth=1)
         qos_profile.durability = rclpy.qos.DurabilityPolicy.TRANSIENT_LOCAL
         qos_profile.reliability = rclpy.qos.ReliabilityPolicy.RELIABLE
 
-        self.subscription = self.create_subscription(OccupancyGrid,'/map',self.map_callback,qos_profile)
+        qos_profile2 = rclpy.qos.QoSProfile(depth=5)
+        qos_profile2.durability = rclpy.qos.DurabilityPolicy.VOLATILE
+        qos_profile2.reliability = rclpy.qos.ReliabilityPolicy.RELIABLE
+
+        self.subscription = self.create_subscription(OccupancyGrid, '/map', self.map_callback, qos_profile)
+        self.subscription = self.create_subscription(PoseStamped, '/goal_pose', self.goalPoseCallback, qos_profile2)
+
+        self.subscription = self.create_subscription(PoseWithCovarianceStamped, '/amcl_pose', self.amclPoseCallback, qos_profile)
 
         self.path_publisher = self.create_publisher(Path, '/planned_path', 10)
 
         self.get_logger().info('Subscriptions and Publishers initialized')
+
+    def amclPoseCallback(self,msg):
+        self.robot_pose_x = msg.pose.pose.position.x
+        self.robot_pose_y = msg.pose.pose.position.y
+        print("girdi", self.robot_pose_y)
+
+    def goalPoseCallback(self, msg):
+        self.get_logger().info("Goal received")
+        self.goal_x = msg.pose.position.x
+        self.goal_y = msg.pose.position.y
+        if self.map_received:
+            self.plan_and_publish_path()
 
     def map_callback(self, msg):
         self.get_logger().info('Map received')
@@ -29,16 +53,9 @@ class PathPlanner(Node):
         self.resolution = msg.info.resolution
         self.origin = msg.info.origin
         self.create_occupancy_grid()
-
-        # Example start and goal positions (in meters)
-        start = (-0.30754125118255615, -2.1467812061309814)  # Replace with actual robot's current position
-        goal = (17.745447158813477, 18.52811050415039)  # Replace with actual goal position
-        path = self.plan_path(start, goal)
-        if path:
-            self.get_logger().info(f'Path found: {path}')
-            self.send_path_to_robot(path)
-        else:
-            self.get_logger().warn('No path found')
+        self.map_received = True
+        if self.goal_x != 0 or self.goal_y != 0:  # Check if a goal has already been set
+            self.plan_and_publish_path()
 
     def create_occupancy_grid(self):
         self.occupancy_grid = []
@@ -93,6 +110,17 @@ class PathPlanner(Node):
             return path_coords
         else:
             return None
+
+    def plan_and_publish_path(self):
+
+        start = (self.robot_pose_x, self.robot_pose_y)
+        goal = (self.goal_x, self.goal_y)
+        path = self.plan_path(start, goal)
+        if path:
+            self.get_logger().info(f'Path found: {path}')
+            self.send_path_to_robot(path)
+        else:
+            self.get_logger().warn('No path found')
 
     def send_path_to_robot(self, path):
         path_msg = Path()
