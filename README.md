@@ -41,6 +41,19 @@ $$
 - If **Vl>Vr**, robot rotates right otherwise rotates left. 
 
 
+### How to Launch Project
+```
+ros2 launch diff_robot robot.launch.py
+```
+```
+cd ~/ros2_ws/src/diff_robot
+chmod +x start.sh
+./start.sh
+
+```
+
+
+
 ### Mapping with Nav2
 Used Nav2 package to generate `.pgm` format map.
 <div id="header" align="center">
@@ -64,18 +77,6 @@ Once you get a good enough looking map, you can save it.
 ```
 ros2 run nav2_map_server map_saver_cli -f my_map
 ```
-
-### .pgm format to occupancy grid map
-
-```
-map_server map_server --ros-args -p yaml_filename:=~/ros2_ws/src/diff_robot/map/my_map.yaml
-```
-
-```
-ros2 run nav2_util lifecycle_bringup map_server
-```
-
-
 
 
 
