@@ -9,7 +9,7 @@ def generate_launch_description():
     urdf_file_path = '/home/gursel/ros2_ws/src/diff_robot/urdf/diff_robot.urdf'
     rviz_config_file_path = '/home/gursel/ros2_ws/src/diff_robot/urdf/rviz.rviz'
     slam_params_file_path = '/home/gursel/ros2_ws/src/diff_robot/map/slam_params.yaml'
-    world_file_path = '/home/gursel/ros2_ws/src/diff_robot/world/office_small.world'
+    world_file_path = '/home/gursel/ros2_ws/src/diff_robot/world/silverstone_track.world'
     controller_config_file_path = '/home/gursel/ros2_ws/src/diff_robot/control/diff_drive_controller.yaml'
     map_file = '/home/gursel/ros2_ws/src/diff_robot/src/my_map.yaml'
     #nav2_params_file_path = '/home/gursel/ros2_ws/src/diff_robot/config/nav2_params.yaml'  # Path to your Nav2 parameters file

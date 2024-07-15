@@ -64,21 +64,21 @@ class VisualizationNode(Node):
         # Plot the path
         if self.path:
             path_x, path_y = zip(*self.path)
-            self.ax.plot(path_x, path_y, 'go-', label='Planned Path', markersize=1)
+            self.ax.plot(path_x, path_y, 'go:', label='Planned Path', markersize=25)
 
         # Plot the trajectory
         if self.trajectory:
             traj_x, traj_y = zip(*self.trajectory)
-            self.ax.plot(traj_x, traj_y, 'ro-', label='Robot Trajectory', markersize=1)
+            self.ax.plot(traj_x, traj_y, 'ro-', label='Robot Trajectory', markersize=10)
 
 
         if self.current_pose:
-            zoom_level = 10  # Define the zoom level in meters
+            zoom_level = 3  # Define the zoom level in meters
             x_center, y_center = self.current_pose
             self.ax.set_xlim(x_center - zoom_level, x_center + zoom_level)
             self.ax.set_ylim(y_center - zoom_level, y_center + zoom_level)
 
-        self.ax.legend(["This is my legend"], fontsize="x-large")
+        self.ax.legend()
         self.ax.set_xlabel('X')
         self.ax.set_ylabel('Y')
         self.ax.set_title('Path and Trajectory')

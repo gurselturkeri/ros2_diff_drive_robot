@@ -41,7 +41,6 @@ class PurePursuit(Node):
         self.goal_x = msg.pose.position.x
         self.goal_y = msg.pose.position.y
 
-
     def pose_callback(self, msg):
         pose = msg.pose.pose
         self.current_pose = (pose.position.x, pose.position.y, self.get_yaw_from_quaternion(pose.orientation))
@@ -76,7 +75,8 @@ class PurePursuit(Node):
 
         self.get_logger().info(f'alpha={alpha}, Ld={Ld}')
 
-        if self.goal_x==x and self.goal_y==y:
+        # Check if the robot is within goal tolerance
+        if self.is_goal_reached(x, y):
             self.get_logger().info("Reached goal within tolerance, stopping.")
             cmd_msg = Twist()
             cmd_msg.linear.x = 0.0
@@ -86,7 +86,7 @@ class PurePursuit(Node):
 
         cmd_msg = Twist()
         cmd_msg.linear.x = 0.05  # Adjust this value based on your robot's capability
-        cmd_msg.angular.z = 1 * cmd_msg.linear.x * math.sin(alpha) / Ld
+        cmd_msg.angular.z = -1 * cmd_msg.linear.x * math.sin(alpha) / Ld
 
         self.get_logger().info(f'Publishing cmd_vel: linear.x={cmd_msg.linear.x}, angular.z={cmd_msg.angular.z}')
         self.cmd_publisher.publish(cmd_msg)
@@ -99,6 +99,11 @@ class PurePursuit(Node):
                 return point
         self.get_logger().info("No lookahead point found within lookahead distance.")
         return None, None
+
+    def is_goal_reached(self, x, y):
+        dist_to_goal = math.sqrt((self.goal_x - x)**2 + (self.goal_y - y)**2)
+        self.get_logger().info(f'Distance to goal: {dist_to_goal}')
+        return dist_to_goal <= self.goal_tolerance
 
 def main(args=None):
     rclpy.init(args=args)
