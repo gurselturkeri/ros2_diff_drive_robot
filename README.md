@@ -2,7 +2,7 @@
 A ROS 2 package for simulating and controlling a differential drive robot. This repository includes everything needed to get started with differential drive robots in ROS 2, from URDF modeling and Gazebo simulation to navigation and control.
 
 <div id="header" align="center">
-  <img src="https://raw.githubusercontent.com/gurselturkeri/ros2_diff_drive_robot/main/docs/genis_ekran.gif" width="800" height="400"/>
+  <img src="https://raw.githubusercontent.com/gurselturkeri/ros2_diff_drive_robot/main/docs/a.png"/>
 </div>
 
 
