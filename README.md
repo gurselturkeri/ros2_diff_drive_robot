@@ -2,8 +2,11 @@
 A ROS 2 package for simulating and controlling a differential drive robot. This repository includes everything needed to get started with differential drive robots in ROS 2, from URDF modeling and Gazebo simulation to navigation and control.
 
 - [Differential Drive Kinematics](#differential_drive_kinematics)
+- [Installation & Launch](#installation--launch)
+- [Mapping with Nav2](#mapping-with-nav2)
+- [A* Path Planner](#a-path-planner)
+- [Pure Pursuit Path Tracking](#pure-pursuit-path-tracking)
 - [Dependencies](#dependencies)
-- [Installation](#installation)
 - [References](#references)
 
 ### Differential Drive Kinematics
