@@ -1,116 +1,176 @@
 import rclpy
 from rclpy.node import Node
-from geometry_msgs.msg import Twist, PoseWithCovarianceStamped, PoseStamped
+from geometry_msgs.msg import Twist, PoseWithCovarianceStamped
 from nav_msgs.msg import Path
-import math
-import tf_transformations
+from rclpy.qos import QoSProfile, DurabilityPolicy, ReliabilityPolicy
+import numpy as np
 
-class PurePursuit(Node):
+class MPPIController(Node):
     def __init__(self):
-        super().__init__('pure_pursuit')
-        self.declare_parameter('lookahead_distance', 1.0)
-        self.declare_parameter('goal_tolerance', 0.1)  # Define goal tolerance
-
+        super().__init__('mppi_controller')
+        self.get_logger().info('Initializing MPPI Controller Node')
         qos_profile = rclpy.qos.QoSProfile(depth=1)
         qos_profile.durability = rclpy.qos.DurabilityPolicy.TRANSIENT_LOCAL
         qos_profile.reliability = rclpy.qos.ReliabilityPolicy.RELIABLE
+        # Parameters
+        self.dt = 0.1  # Time step
+        self.horizon = 30 # Horizon length
+        self.num_samples = 100  # Number of sampled trajectories
+        self.control_dim = 2  # [v, omega]
+        self.gamma = 0.5 #mperature parameter for weighting
 
-        qos_profile2 = rclpy.qos.QoSProfile(depth=5)
-        qos_profile2.durability = rclpy.qos.DurabilityPolicy.VOLATILE
-        qos_profile2.reliability = rclpy.qos.ReliabilityPolicy.RELIABLE
+        # Robot state
+        self.robot_pose = np.zeros(3)  # [x, y, theta]
+        self.global_path = []
 
-        self.lookahead_distance = self.get_parameter('lookahead_distance').get_parameter_value().double_value
-        self.goal_tolerance = self.get_parameter('goal_tolerance').get_parameter_value().double_value
+        # Subscribers
+        self.create_subscription(Path, '/planned_path', self.path_callback, 10)
+        self.create_subscription(PoseWithCovarianceStamped, '/amcl_pose', self.pose_callback, qos_profile)
 
-        self.path_subscriber = self.create_subscription(Path, '/planned_path', self.path_callback, 10)
-        self.pose_subscriber = self.create_subscription(PoseWithCovarianceStamped, '/amcl_pose', self.pose_callback, qos_profile)
-        self.cmd_publisher = self.create_publisher(Twist, '/cmd_vel', 10)
-        self.subscription = self.create_subscription(PoseStamped, '/goal_pose', self.goalPoseCallback, qos_profile2)
+        # Publisher
+        self.cmd_vel_publisher = self.create_publisher(Twist, '/cmd_vel', 10)
 
-        self.path = []
-        self.current_pose = None
+        self.get_logger().info('Subscriptions and Publishers initialized')
 
     def path_callback(self, msg):
-        self.path = [(pose.pose.position.x, pose.pose.position.y) for pose in msg.poses]
-        self.get_logger().info(f'Path received with {len(self.path)} points')
-        if self.current_pose is not None:
-            self.pure_pursuit_control()
+        self.get_logger().info('Path received with %d poses' % len(msg.poses))
+        self.global_path = [(pose.pose.position.x, pose.pose.position.y) for pose in msg.poses]
+        self.get_logger().info('Global path updated: %s' % str(self.global_path))
+        self.follow_path()  # Trigger follow_path after updating the path
 
-    def goalPoseCallback(self, msg):
-        self.get_logger().info("Goal received")
-        self.goal_x = msg.pose.position.x
-        self.goal_y = msg.pose.position.y
 
-    def pose_callback(self, msg):
-        pose = msg.pose.pose
-        self.current_pose = (pose.position.x, pose.position.y, self.get_yaw_from_quaternion(pose.orientation))
-        self.get_logger().info(f'Received pose: {self.current_pose}')
-        if self.path:
-            self.pure_pursuit_control()
+    def pose_callback(self, msg: PoseWithCovarianceStamped):
+        self.get_logger().info('Pose updated: x=%.2f, y=%.2f, theta=%.2f' % (
+        self.robot_pose[0], self.robot_pose[1], self.robot_pose[2]
+    ))
 
-    def get_yaw_from_quaternion(self, orientation):
-        _, _, yaw = tf_transformations.euler_from_quaternion([orientation.x, orientation.y, orientation.z, orientation.w])
-        return yaw
+        position = msg.pose.pose.position
+        orientation = msg.pose.pose.orientation
+        self.robot_pose = 0.9 * self.robot_pose + 0.1 * np.array([
+            position.x,
+            position.y,
+            self.quaternion_to_yaw(orientation)
+        ])
+        self.get_logger().info('Updated pose: %s' % str(self.robot_pose))
+        
+        self.follow_path()
 
-    def pure_pursuit_control(self):
-        self.get_logger().info("Entered pure_pursuit_control")
-        if not self.path or not self.current_pose:
-            self.get_logger().info("Path or current pose not available.")
+    def follow_path(self):
+        if not self.global_path:
+            self.get_logger().warn('No global path available')
+            return
+        
+        # Hedef noktaya olan mesafeyi hesapla
+        goal = np.array(self.global_path[-1])  # Son hedef
+        distance_to_goal = np.linalg.norm(self.robot_pose[:2] - goal)
+
+        # Hedefe çok yaklaşıldığında durma
+        if distance_to_goal < 0.2:  # Bu mesafeyi ihtiyaca göre ayarlayabilirsiniz
+            self.get_logger().info('Goal reached, stopping the robot')
+            self.stop_robot()
             return
 
-        x, y, yaw = self.current_pose
-        self.get_logger().info(f'Current Pose: x={x}, y={y}, yaw={yaw}')
-        goal_x, goal_y = self.find_lookahead_point(x, y)
+        # Robotun mevcut yönelimine doğru dönüş yap
+        heading_error = self.get_heading_error(goal)
+        control = self.mppi_control(heading_error)
 
-        if goal_x is None or goal_y is None:
-            self.get_logger().info("No valid lookahead point found.")
-            cmd_msg = Twist()
-            cmd_msg.linear.x = 0.0
-            cmd_msg.angular.z = 0.0
-            self.cmd_publisher.publish(cmd_msg)
-            return
+        # Hedefe doğru yumuşak bir şekilde yönel
+        if control is not None:
+            self.publish_velocity(control)
 
-        alpha = math.atan2(goal_y - y, goal_x - x) - yaw
-        Ld = math.sqrt((goal_x - x)**2 + (goal_y - y)**2)
+    def get_heading_error(self, goal):
+        """Hedefin robotun mevcut yönelimine göre hata açısını hesaplar."""
+        goal_angle = np.arctan2(goal[1] - self.robot_pose[1], goal[0] - self.robot_pose[0])
+        heading_error = goal_angle - self.robot_pose[2]
+        heading_error = (heading_error + np.pi) % (2 * np.pi) - np.pi  # -pi ile pi arasında tut
+        return heading_error
 
-        self.get_logger().info(f'alpha={alpha}, Ld={Ld}')
+    def mppi_control(self, heading_error):
+        if len(self.global_path) < 2:
+            return None
 
-        # Check if the robot is within goal tolerance
-        if self.is_goal_reached(x, y):
-            self.get_logger().info("Reached goal within tolerance, stopping.")
-            cmd_msg = Twist()
-            cmd_msg.linear.x = 0.0
-            cmd_msg.angular.z = 0.0
-            self.cmd_publisher.publish(cmd_msg)
-            return
+        # Başlangıç durumu
+        x0 = self.robot_pose
+        controls = np.zeros((self.horizon, self.control_dim))  # [v, omega] kontrol dizisi
 
-        cmd_msg = Twist()
-        cmd_msg.linear.x = 0.05  # Adjust this value based on your robot's capability
-        cmd_msg.angular.z = -1 * cmd_msg.linear.x * math.sin(alpha) / Ld
+        # Örneklenen kontrol yolları
+        sampled_trajectories = np.random.randn(self.num_samples, self.horizon, self.control_dim) * 0.1
+        costs = np.zeros(self.num_samples)
 
-        self.get_logger().info(f'Publishing cmd_vel: linear.x={cmd_msg.linear.x}, angular.z={cmd_msg.angular.z}')
-        self.cmd_publisher.publish(cmd_msg)
+        for i, trajectory in enumerate(sampled_trajectories):
+            state = np.copy(x0)
+            for t in range(self.horizon):
+                control = trajectory[t]
+                state = self.simulate(state, control)
+                costs[i] += self.cost(state, t)
 
-    def find_lookahead_point(self, x, y):
-        for point in self.path:
-            dist = math.sqrt((point[0] - x)**2 + (point[1] - y)**2)
-            if dist >= self.lookahead_distance:
-                self.get_logger().info(f'Lookahead point found: x={point[0]}, y={point[1]}')
-                return point
-        self.get_logger().info("No lookahead point found within lookahead distance.")
-        return None, None
+        # Ağırlıklı kontrol
+        weights = np.exp(-costs / self.gamma)
+        weights /= np.sum(weights)
 
-    def is_goal_reached(self, x, y):
-        dist_to_goal = math.sqrt((self.goal_x - x)**2 + (self.goal_y - y)**2)
-        self.get_logger().info(f'Distance to goal: {dist_to_goal}')
-        return dist_to_goal <= self.goal_tolerance
+        # Ağırlıklı kontrol toplamı
+        for i, trajectory in enumerate(sampled_trajectories):
+            controls += weights[i] * trajectory
+
+        # Başlangıçta hedefe doğru düzgün bir dönüş yapacak şekilde kontrolü ayarla
+        if abs(heading_error) < 0.1:  # Küçük bir hata olduğunda dönüşü durdur
+            controls[:, 1] = 0  # Dönüş hızını sıfırlayarak doğrusal hızda ilerlemesini sağla
+
+        return controls[0]  # İlk kontrol aksiyonunu geri döndür
+
+    
+
+    def stop_robot(self):
+        twist = Twist()
+        twist.linear.x = 0.0
+        twist.angular.z = 0.0
+        self.cmd_vel_publisher.publish(twist)
+
+    def simulate(self, state, control):
+        """Simulate the robot's motion for one timestep."""
+        x, y, theta = state
+        v, omega = control
+        new_x = x + v * np.cos(theta) * self.dt
+        new_y = y + v * np.sin(theta) * self.dt
+        new_theta = theta + omega * self.dt
+        return np.array([new_x, new_y, new_theta])
+
+    def cost(self, state, t):
+        """Cost function combining path following and obstacle avoidance."""
+        # Path following cost
+        if t < len(self.global_path):
+            goal = np.array(self.global_path[t])
+            path_cost = np.linalg.norm(state[:2] - goal)
+        else:
+            path_cost = 0.0
+
+        # Control effort cost
+        control_effort_cost = 0.01 * np.sum(np.square(state))
+
+        reversing_penalty = 100.0 if state[2] < 0 else 0.0  # Penalize negative linear velocity
+
+
+        return path_cost + control_effort_cost + reversing_penalty
+
+    def publish_velocity(self, control):
+        """Publish the velocity command."""
+        twist = Twist()
+        twist.linear.x = min(control[0], 1.0)  # Cap maximum linear velocity
+        twist.angular.z = control[1]
+        self.cmd_vel_publisher.publish(twist)
+
+    def quaternion_to_yaw(self, q):
+        """Convert quaternion to yaw angle."""
+        return np.arctan2(2.0 * (q.w * q.z + q.x * q.y), 1.0 - 2.0 * (q.y ** 2 + q.z ** 2))
+
 
 def main(args=None):
     rclpy.init(args=args)
-    pure_pursuit = PurePursuit()
-    rclpy.spin(pure_pursuit)
-    pure_pursuit.destroy_node()
+    mppi_controller = MPPIController()
+    rclpy.spin(mppi_controller)
+    mppi_controller.destroy_node()
     rclpy.shutdown()
+
 
 if __name__ == '__main__':
     main()

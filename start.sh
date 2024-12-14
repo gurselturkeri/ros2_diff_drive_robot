@@ -40,7 +40,7 @@ sleep 4
 python3 /home/gursel/ros2_ws/src/diff_robot/planning/a_star_path_finding.py &
 echo "A* PATH PLANNER"
 
-sleep 4
+# sleep 4
 
-python3 /home/gursel/ros2_ws/src/diff_robot/control/visualize.py
+# python3 /home/gursel/ros2_ws/src/diff_robot/control/visualize.py
 

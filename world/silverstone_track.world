@@ -133,7 +133,7 @@
         <collision name='collision'>
           <geometry>
             <mesh>
-              <uri>model://silverstone_track/silverstone_track.stl</uri>
+              <uri>file:///home/gursel/ros2_ws/src/diff_robot/world/models/silverstone_track/silverstone_track.stl</uri>
               <scale>0.4 0.4 0.4</scale>
             </mesh>
           </geometry>
@@ -154,7 +154,7 @@
         <visual name='visual'>
           <geometry>
             <mesh>
-              <uri>model://silverstone_track/silverstone_track.stl</uri>
+              <uri>file:///home/gursel/ros2_ws/src/diff_robot/world/models/silverstone_track/silverstone_track.stl</uri>
               <scale>0.4 0.4 0.4</scale>
             </mesh>
           </geometry>
