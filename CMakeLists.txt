@@ -14,6 +14,7 @@ find_package(controller_manager REQUIRED)
 find_package(diff_drive_controller REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(nav2_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
 
 # uncomment the following section in order to fill in
 # further dependencies manually.
@@ -29,6 +30,9 @@ install(
 
 add_executable(pose_publisher src/odom_pose.cpp)
 ament_target_dependencies(pose_publisher rclcpp nav_msgs geometry_msgs)
+
+add_executable(vel_publisher src/vel_publisher.cpp)
+ament_target_dependencies(vel_publisher rclcpp geometry_msgs)
 
 
 
@@ -46,6 +50,7 @@ endif()
 
 install(TARGETS
   pose_publisher
+  vel_publisher
   DESTINATION lib/${PROJECT_NAME})
 
 ament_package()

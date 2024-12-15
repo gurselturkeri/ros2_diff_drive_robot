@@ -20,6 +20,7 @@
   <exec_depend>robot_state_publisher</exec_depend>
   <exec_depend>gazebo_ros</exec_depend>
   <depend>controller_manager</depend>
+  <depend>geometry_msgs</depend>
   <depend>diff_drive_controller</depend>
 
 
