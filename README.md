@@ -57,6 +57,7 @@ $$
 ```
 cd ~/ros2_ws/src/
 git clone https://github.com/gurselturkeri/ros2_diff_drive_robot.git
+mv ros2_diff_drive_robot diff_robot
 ```
 ```
 colcon build
